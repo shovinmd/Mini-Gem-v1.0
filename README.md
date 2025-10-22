@@ -1,4 +1,4 @@
-# 🤖 ESP32 Mini Gem v1.0
+# 🤖 ESP32 Gemini Assistant
 
 <div align="center">
 
@@ -37,15 +37,24 @@
 ## 🎯 Features
 
 ### 🧠 AI Integration
-- **Gemini AI Chat** - Conversational AI powered by Google's Gemini
-- **Smart Responses** - Context-aware AI interactions
+- **Gemini 2.0 Flash** - Latest Google Gemini AI model for faster, better responses
+- **Smart Responses** - Context-aware AI interactions with proper JSON parsing
 - **Web-based Interface** - Easy chat interface via browser
+- **Error Handling** - Robust error handling for API responses
 
 ### 👁️ Advanced Eye Animations
 - **13+ Expressions** - Normal, Happy, Sad, Angry, Cute, Wonder, Blink
 - **Directional Movement** - Left, Right, Up, Down eye movements
 - **Smooth Transitions** - Frame-by-frame animation system
 - **Emotional Responses** - Eyes react to different system states
+- **Dynamic Timing** - Eye expressions change every 2 seconds for lively interaction
+
+### 👤 User Personalization
+- **Custom Username** - Set your name for personalized experience
+- **Time-based Greetings** - "Good morning/afternoon/evening/night, [username]"
+- **Welcome Messages** - Personalized startup with 3-second display
+- **Persistent Settings** - Username saved to SPIFFS, survives restarts
+- **Web Interface** - Easy username update via System tab
 
 ### 💓 Heartbeat Monitoring
 - **Real-time BPM** - Accurate heart rate calculation
@@ -81,19 +90,20 @@
 |-----------|----------|---------------|
 | **ESP32 Dev Board** | 1 | ESP32-WROOM-32 or similar |
 | **SSD1306 OLED Display** | 1 | 128x64, I2C interface |
-| **TTP223 Touch Sensor** | 1 | Capacitive touch module |
+| **TTP223 Touch Sensor** | 2 | Capacitive touch module (self-lock high TTL mode) |
 | **Heartbeat Sensor** | 1 | Analog pulse sensor |
 | **LEDs** | 4 | Any color, 3mm or 5mm |
 | **Resistors** | 4 | 220Ω (for LEDs) |
 | **Passive Buzzer** | 1 | 5V compatible |
 | **Breadboard** | 1 | Half-size or full-size |
-| **Jumper Wires** | 20+ | Male-to-male, Male-to-female |
+| **Jumper Wires** | 25+ | Male-to-male, Male-to-female |
 
 ### 💰 Estimated Cost
-- **Total Cost**: ~$25-35 USD
+- **Total Cost**: ~$30-40 USD
 - **ESP32**: $8-12
 - **OLED Display**: $5-8
-- **Sensors & Components**: $10-15
+- **Touch Sensors (2x)**: $4-6
+- **Sensors & Components**: $13-14
 
 ---
 
@@ -150,13 +160,14 @@ Configure these settings:
 ├─────────────────┤    ├─────────────────┤
 │ GPIO21 (SDA)    │◄──►│ OLED SDA        │
 │ GPIO22 (SCL)    │◄──►│ OLED SCL        │
-│ GPIO4           │◄──►│ Touch Sensor OUT│
+│ GPIO4           │◄──►│ Touch Sensor 1  │
+│ GPIO5           │◄──►│ Touch Sensor 2  │
 │ GPIO34          │◄──►│ Heartbeat Signal│
 │ GPIO32          │◄──►│ Heartbeat VCC   │
-│ GPIO25          │◄──►│ LED 1 + 220Ω    │
-│ GPIO26          │◄──►│ LED 2 + 220Ω    │
-│ GPIO27          │◄──►│ LED 3 + 220Ω    │
-│ GPIO14          │◄──►│ LED 4 + 220Ω    │
+│ GPIO25          │◄──►│ Main LED + 220Ω │
+│ GPIO18          │◄──►│ LED 2 + 220Ω    │
+│ GPIO19          │◄──►│ LED 3 + 220Ω    │
+│ GPIO23          │◄──►│ LED 4 + 220Ω    │
 │ GPIO26          │◄──►│ Buzzer +        │
 │ 3.3V            │◄──►│ All VCC pins    │
 │ GND             │◄──►│ All GND pins    │
@@ -174,12 +185,13 @@ GPIO22   →   SCL        I2C Clock
 GND      →   GND        Ground
 ```
 
-#### Touch Sensor (TTP223)
+#### Touch Sensors (TTP223) - Dual Sensor Setup
 ```
 ESP32 Pin    TTP223 Pin    Function
-GPIO4    →   OUT           Touch Detection
-3.3V     →   VCC           Power
-GND      →   GND           Ground
+GPIO4    →   OUT           Touch Sensor 1 (Open menu and navigate)
+GPIO5    →   OUT           Touch Sensor 2 (Move down list, cycle to top)
+3.3V     →   VCC           Power (both sensors)
+GND      →   GND           Ground (both sensors)
 ```
 
 #### Heartbeat Sensor
@@ -190,13 +202,13 @@ GPIO32   →   VCC          Power Control
 GND      →   GND          Ground
 ```
 
-#### LEDs (4x)
+#### LEDs (4x) - Updated Pin Assignments
 ```
 ESP32 Pin    LED Pin       Function
 GPIO25   →   LED1 + 220Ω   Main LED
-GPIO26   →   LED2 + 220Ω   Additional LED
-GPIO27   →   LED3 + 220Ω   Additional LED
-GPIO14   →   LED4 + 220Ω   Additional LED
+GPIO18   →   LED2 + 220Ω   Additional LED
+GPIO19   →   LED3 + 220Ω   Additional LED
+GPIO23   →   LED4 + 220Ω   Additional LED
 GND      →   All Cathodes  Common Ground
 ```
 
@@ -221,16 +233,17 @@ All pin definitions are in `config.h`:
 #define OLED_SCL_PIN 22
 #define OLED_ADDRESS 0x3C
 
-// Touch Sensor
-#define TOUCH_PIN 4
+// Touch Sensors (Dual Setup)
+#define TOUCH_PIN_1 4    // Touch Sensor 1: Open menu and navigate
+#define TOUCH_PIN_2 5    // Touch Sensor 2: Move down list, cycle to top
 
 // Heartbeat Sensor
 #define HEARTBEAT_PIN 34
 #define HEARTBEAT_POWER_PIN 32
 
-// LEDs
+// LEDs (Updated Pin Assignments)
 #define LED_PIN 25
-int ledPins[4] = {25, 26, 27, 14};
+int ledPins[4] = {25, 18, 19, 23}; // Main LED + 3 additional LEDs
 
 // Buzzer
 #define BUZZER_PIN 26
@@ -258,29 +271,36 @@ Update `config.h` with your network credentials:
 
 ## 🚀 Usage
 
-### 🎮 Touch Controls
+### 🎮 Dual Touch Sensor Controls
 
-| Gesture | Function |
-|---------|----------|
-| **Single Tap** | Wake animation / Select menu option |
-| **Double Tap** | Show notifications / Navigate menu |
-| **Triple Tap** | Open main menu |
+| Sensor | Function | Description |
+|--------|----------|-------------|
+| **Touch Sensor 1** | Open Menu / Select | Opens menu from idle, selects current item in menu |
+| **Touch Sensor 2** | Navigate / Cycle | Moves down through menu items, cycles to top when at end |
 
-### 📱 Menu Navigation
+### 📱 Menu Navigation System
 
-1. **Triple Tap** - Open main menu
-2. **Double Tap** - Navigate: Tasks → Heartbeat → Gemini → Lamp → Alarm
-3. **Single Tap** - Select current option
+#### **Menu Flow:**
+1. **Touch Sensor 1** → Opens menu (shows first item highlighted)
+2. **Touch Sensor 2** → Navigate through menu items
+3. **At end of list** → Automatically cycles back to top
+4. **Touch Sensor 1** → Select highlighted item and close menu
 
-### 🎯 Menu Options
-
+#### **Menu Options:**
 | Option | Description |
 |--------|-------------|
+| **Dashboard** | Main status screen with time and greetings |
+| **Gemini Chat** | AI chat interface |
 | **Tasks** | View and manage scheduled tasks |
 | **Heartbeat** | Monitor heart rate with LED sync |
-| **Gemini** | AI chat interface |
-| **Lamp** | Control 4 LEDs with patterns |
-| **Alarm** | Set and manage alarms |
+| **Settings** | System configuration options |
+| **System** | System information and management |
+
+### 🎯 Quick Reference:
+- **Open Menu**: Touch Sensor 1 (from idle screen)
+- **Navigate**: Touch Sensor 2 (move down through items)
+- **Select**: Touch Sensor 1 (choose highlighted item)
+- **Cycle**: Touch Sensor 2 (at end of list goes back to top)
 
 ---
 
@@ -352,9 +372,14 @@ Access the web interface at `http://ESP32_IP_ADDRESS`:
 - Automatic reconnection
 
 ### 🔄 System Management
-- OTA firmware updates
-- Device restart
-- Factory reset
+- **OTA Updates** - Over-the-air firmware updates
+- **Arduino IDE Integration** - Direct upload via network port
+- **Web Upload** - Upload .bin files via browser interface
+- **Progress Display** - Real-time update progress on OLED
+- **Password Protection** - Secure updates (default: "gemini123")
+- **Device Restart** - Remote restart functionality
+- **Factory Reset** - Complete system reset with data clearing
+- **Username Management** - Update personalized username
 
 ### 🤖 Gemini Chat
 - AI conversation interface
@@ -403,9 +428,10 @@ Use `hardware_test.ino` to verify all components:
 
 #### Touch Sensor Not Working
 ```bash
-# Verify GPIO4 connection
-# Check TTP223 power and ground
-# Adjust sensitivity if needed
+# Verify GPIO4 and GPIO5 connections
+# Check TTP223 power and ground for both sensors
+# Ensure sensors are in self-lock high TTL mode
+# Test each sensor individually
 ```
 
 #### Heartbeat Sensor Issues
@@ -415,12 +441,20 @@ Use `hardware_test.ino` to verify all components:
 # Sensor only active in heartbeat menu
 ```
 
-#### Compilation Errors
+#### LED Issues
 ```bash
-# Ensure all libraries are installed
-# Check #include statements
-# Verify config.h file exists
-# Check Arduino IDE version compatibility
+# Check new LED pin assignments: GPIO 25, 18, 19, 23
+# Verify 220Ω resistors are connected
+# Ensure GPIO 26 is only used for buzzer (not LED)
+# Test each LED individually
+```
+
+#### Buzzer Not Working
+```bash
+# Verify GPIO 26 connection (dedicated buzzer pin)
+# Check buzzer polarity and power
+# Ensure no conflict with LED pins
+# Test with tone() function
 ```
 
 ### 🔍 Debug Information
@@ -428,12 +462,14 @@ Use `hardware_test.ino` to verify all components:
 Enable Serial Monitor (115200 baud) to see:
 - WiFi connection status
 - SPIFFS initialization
-- Touch detection events
+- Dual touch sensor detection events
 - Heartbeat readings
-- API responses
+- Gemini API responses and debugging
 - Animation state changes
-- Menu navigation
-- Error messages
+- Menu navigation (open, navigate, select)
+- LED pattern changes
+- Buzzer sound events
+- Error messages and troubleshooting info
 
 ---
 
@@ -458,15 +494,78 @@ Enable Serial Monitor (115200 baud) to see:
 ┌─────────────────────────┐
 │      Main Menu          │
 │                         │
-│ ► 1. Tasks              │
-│    2. Heartbeat         │
-│    3. Gemini            │
-│    4. Lamp              │
-│    5. Alarm             │
+│ ► Dashboard             │
+│    Gemini Chat          │
+│    Tasks                │
+│    Heartbeat            │
+│    Settings             │
+│    System               │
 │                         │
-│    Tap:Select 2Tap:Next │
+│    T1:Select T2:Next    │
 └─────────────────────────┘
 ```
+
+---
+
+## 🆕 Recent Updates (v3.0)
+
+### ✨ New Features Added
+
+#### **Dual Touch Sensor System**
+- **Two TTP223 sensors** for intuitive navigation
+- **Touch Sensor 1**: Opens menu and selects items
+- **Touch Sensor 2**: Navigates through menu items and cycles to top
+- **Self-lock high TTL mode** support for both sensors
+
+#### **Enhanced Menu System**
+- **6 Menu Options**: Dashboard, Gemini Chat, Tasks, Heartbeat, Settings, System
+- **Improved Navigation**: Clear separation between open/select and navigate functions
+- **Fixed Text Overlapping**: Proper spacing prevents display issues
+- **Better UX**: Intuitive touch controls with clear instructions
+
+#### **Updated Pin Assignments**
+- **GPIO Conflict Resolution**: Fixed GPIO 26 conflict between LED and buzzer
+- **New LED Pins**: GPIO 18, 19, 23 (instead of 26, 27, 14)
+- **Clean Separation**: Each component has dedicated pins
+- **Better Organization**: Logical grouping of related functions
+
+#### **Improved Gemini AI Integration**
+- **Enhanced API Support**: Primary gemini-1.5-flash with gemini-pro fallback
+- **Better Error Handling**: Detailed error messages and HTML response detection
+- **Larger Response Buffer**: 8192 bytes for longer AI responses
+- **Complete Response Reading**: Timeout-based reading with complete data capture
+
+#### **Advanced Display Features**
+- **Time-based Greetings**: "Good morning/afternoon/evening/night, [username]"
+- **Date Display**: HH:MM DD/MM format on idle screen
+- **Personalized Welcome**: 20-second welcome message with user's name
+- **WiFi Status Indicator**: Visual feedback for connection status
+
+#### **Web Interface Improvements**
+- **Tab Navigation**: Fixed JavaScript syntax for proper tab switching
+- **Time Settings**: Manual time setting and NTP synchronization
+- **User Management**: Username update functionality
+- **Better Error Handling**: Improved API response handling
+
+### 🔧 Technical Improvements
+
+#### **Code Quality**
+- **Modern JavaScript**: Converted to older syntax for better compatibility
+- **Error Handling**: Robust error detection and user feedback
+- **Debug Output**: Detailed Serial Monitor logging
+- **Memory Management**: Optimized buffer sizes and response handling
+
+#### **Hardware Compatibility**
+- **Pin Optimization**: No more GPIO conflicts
+- **Better Documentation**: Clear pin assignments and wiring diagrams
+- **Component Support**: Dual touch sensor setup
+- **Power Management**: Efficient sensor power control
+
+#### **User Experience**
+- **Intuitive Controls**: Clear touch sensor functions
+- **Visual Feedback**: Better display formatting and spacing
+- **Personalization**: Custom username and time-based greetings
+- **Reliability**: Improved error handling and fallback mechanisms
 
 ---
 
