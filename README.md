@@ -98,12 +98,7 @@
 | **Breadboard** | 1 | Half-size or full-size |
 | **Jumper Wires** | 25+ | Male-to-male, Male-to-female |
 
-### 💰 Estimated Cost
-- **Total Cost**: ~$30-40 USD
-- **ESP32**: $8-12
-- **OLED Display**: $5-8
-- **Touch Sensors (2x)**: $4-6
-- **Sensors & Components**: $13-14
+
 
 ---
 
