@@ -144,7 +144,7 @@
 // ============================================================================
 
 // API Settings
-#define GEMINI_API_KEY "AIzaSyBy8NERIqaFiQu84x8_Wc4Vqq1pztBLbhU"
+#define GEMINI_API_KEY ""
 #define GEMINI_ENDPOINT "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateConten"
 
 // Request Settings
