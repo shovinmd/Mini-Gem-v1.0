@@ -1,0 +1,45 @@
+<!-- Add this HTML section to the System tab, before the System Management section -->
+
+<div class="section">
+    <h3>🕐 Time Synchronization</h3>
+    <div class="form-group">
+        <label>Current Time</label>
+        <input type="datetime-local" id="currentTime" placeholder="Set current time">
+    </div>
+    <button onclick="syncTime()" class="btn-success">🕐 Sync Time</button>
+    <button onclick="syncWithNTP()" class="btn-secondary">🌐 Sync with NTP</button>
+</div>
+
+<!-- Add these JavaScript functions to the script section -->
+
+function syncTime() {
+    const timeInput = document.getElementById('currentTime').value;
+    if(!timeInput) {
+        alert('Please select a time');
+        return;
+    }
+    
+    const date = new Date(timeInput);
+    const timestamp = Math.floor(date.getTime() / 1000);
+    
+    fetch('/api/time', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({timestamp: timestamp})
+    }).then(() => {
+        alert('Time synchronized successfully!');
+        document.getElementById('currentTime').value = '';
+    });
+}
+
+function syncWithNTP() {
+    fetch('/api/time/ntp', {method: 'POST'})
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                alert('Time synchronized with NTP server!');
+            } else {
+                alert('NTP sync failed: ' + data.error);
+            }
+        });
+}
